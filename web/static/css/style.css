@@ -1,0 +1,138 @@
+body {
+    font-family: 'Arial', Helvetica, sans-serif;
+    background: linear-gradient(135deg, #f06, #ffba08);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    animation: backgroundAnimation 10s infinite alternate;
+}
+
+@keyframes backgroundAnimation {
+    0% {
+        background: linear-gradient(135deg, #f06, #ffba08);
+    }
+    100% {
+        background: linear-gradient(135deg, #00c6ff, #0072ff);
+    }
+}
+
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+.table-container {
+    overflow-x: auto; /* 启用水平滚动条 */
+    margin: 20px 0; /* 添加一些外边距 */
+}
+
+table {
+    width: 100%; /* 表格宽度为100% */
+    border-collapse: collapse; /* 合并表格边框为单行 */
+}
+
+th, td {
+    padding: 8px; /* 单元格内边距 */
+    text-align: left; /* 文字左对齐 */
+    border-bottom: 1px solid #ddd; /* 底部边框 */
+}
+
+
+input[type=text]:focus, input[type=password]:focus {
+    border-color: #3BDDBDFF;
+    box-shadow: 0 0 10px rgba(59, 221, 189, 0.5);
+}
+
+button {
+    background-color: #3BDDBDFF;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #34c3a3;
+    transform: scale(1.05);
+}
+
+.imgcontainer {
+    width: 30%;
+    min-width: 500px;
+    text-align: center;
+    margin: 24px auto 12px;
+    animation: fadeIn 2s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+img.avatar {
+    width: 40%;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+img.avatar:hover {
+    transform: rotate(360deg);
+}
+
+.container {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideIn 1s;
+    width: 100%;
+    max-width: 2000px;
+    margin: auto; /* 水平居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 内部元素居中对齐 */
+}
+
+span.psw {
+    float: right;
+    padding-top: 16px;
+}
+
+#login_control {
+    display: flex;
+    justify-content: space-between;
+}
+
+#login_control button {
+    width: 150px;
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+    span.psw {
+        display: block;
+        float: none;
+    }
+
+    .cancelbtn, .imgcontainer, button, input[type=text], input[type=password] {
+        width: 100%;
+    }
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="images/favicon.ico" rel="shortcut icon">
+    <script src="js/app.js" type="text/javascript"></script>
+    <script src="https://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+    <script src="https://www.gongjuji.net/Content/files/jquery.md5.js"></script>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+</head>
+<body>
+
+<form method="post">
+    <div class="container">
+        <label><b>用户名</b></label>
+        <input id="username" name="uname" readonly required type="text">
+        <label><b>昵称</b></label>
+        <input id="nickname" name="nick" placeholder="Enter nickname" required type="text">
+        <h4>CA证书配置</h4>
+
+        <label><b>orgId</b></label>
+        <label for="orgId"></label><input id="orgId" name="orgId" placeholder="Enter orgId" required type="text">
+
+        <label><b>userId</b></label>
+        <label for="userId"></label><input id="userId" name="userId" placeholder="Enter userId" required type="text">
+
+        <label><b>userType</b></label>
+        <label for="userType"></label><input id="userType" name="userType" placeholder="Enter userType" required
+                                             type="text">
+
+        <label><b>certUsage</b></label>
+        <label for="certUsage"></label><input id="certUsage" name="certUsage" placeholder="Enter certUsage" required
+                                              type="text">
+
+        <label><b>country</b></label>
+        <label for="country"></label><input id="country" name="country" placeholder="Enter country" required
+                                            type="text">
+
+        <label><b>locality</b></label>
+        <label for="locality"></label><input id="locality" name="locality" placeholder="Enter locality" required
+                                             type="text">
+
+        <label><b>province</b></label>
+        <label for="province"></label><input id="province" name="province" placeholder="Enter province" required
+                                             type="text">
+
+        <div id="login_control">
+            <button id="btn_createcert" onclick="createCert()" type="button">创建证书</button>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
+
+<script>
+    var username = document.getElementById('username')
+
+    from_username = getQueryVariable('name')
+    username.value = from_username
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('get', urlPrefix + '/user/get_user_info?username=' + from_username);
+    xhr.send()
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = eval("(" + xhr.responseText + ")")
+
+            if (json.code !== 0) {
+                alert("请先登录!" + json.msg)
+                window.location.href = "login.html"
+            }
+            console.log(json)
+            username.value = json.data.user_name
+            nickname.value = json.data.nick_name
+            previousNickname = json.data.nick_name
+        }
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] === variable) {
+                return pair[1];
+            }
+        }
+        return false;
+    }
+
+    function createCert() {
+        var orgId = document.getElementById("orgId")
+        var userId = document.getElementById("userId")
+        var userType = document.getElementById("userType")
+        var certUsage = document.getElementById("certUsage")
+        var country = document.getElementById("country")
+        var locality = document.getElementById("locality")
+        var province = document.getElementById("province")
+        if (orgId.value === "") {
+            orgId.focus();
+            return;
+        }
+
+        if (userId.value === "") {
+            userId.focus();
+            return;
+        }
+
+        if (userType.value === "") {
+            userType.focus();
+            return;
+        }
+
+        if (certUsage.value === "") {
+            certUsage.focus();
+            return;
+        }
+
+        if (country.value === "") {
+            country.focus();
+            return;
+        }
+
+        if (locality.value === "") {
+            locality.focus();
+            return;
+        }
+
+        if (province.value === "") {
+            province.focus();
+            return;
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/cert/create',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value,
+                "org_id": orgId.value,
+                "user_id": userId.value,
+                "user_type": userType.value,
+                "cert_usage": certUsage.value,
+                "country": country.value,
+                "locality": locality.value,
+                "province": province.value
+            }),
+            success: function (result) {
+                if (result.code === 0) {
+                    alert("创建证书成功");
+                } else {
+                    alert("创建证书失败")
+                }
+            },
+            error: function () {
+                alert("创建证书失败")
+            }
+        });
+    }
+
+
+</script>

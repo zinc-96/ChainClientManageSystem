@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="images/favicon.ico" rel="shortcut icon">
+    <script src="js/app.js" type="text/javascript"></script>
+    <script src="https://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+    <script src="https://www.gongjuji.net/Content/files/jquery.md5.js"></script>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+</head>
+<body>
+
+<div class="container">
+
+    <label><b>用户名</b></label>
+    <label for="username"></label><input id="username" name="uname" placeholder="Enter Username" required type="text">
+
+    <label><b>密码</b></label>
+    <label for="passwd"></label><input id="passwd" name="psw" placeholder="Enter Password" required type="password">
+
+    <label><b>昵称</b></label>
+    <label for="nickname"></label><input id="nickname" name="nickname" placeholder="Enter NickName" required
+                                         type="text">
+
+    <button onclick="register()" type="submit">注册</button>
+
+</div>
+
+</body>
+</html>
+
+
+<script>
+    function register() {
+        console.log("register！！！")
+        var username = document.getElementById("username")
+        var passwd = document.getElementById("passwd")
+        var nickname = document.getElementById("nickname")
+
+        if (username.value === "") {
+            username.focus();
+            return;
+        }
+
+        if (passwd.value === "") {
+            passwd.focus();
+            return;
+        }
+
+        if (nickname.value === "") {
+            nickname.focus();
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/user/register',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value,
+                "pass_word": passwd.value,
+                "nick_name": nickname.value,
+            }),
+            success: function (result) {
+                if (result.code === 0) {
+                    window.location.href = urlPrefix + "/static/login.html";
+                    window.event.returnValue = false
+                } else {
+                    console.log("result.code======", result.code)
+                    alert("注册失败")
+                }
+            },
+            error: function (result) {
+                console.log("result.code======", result.code)
+                alert("注册失败")
+            }
+        });
+    }
+</script>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="images/favicon.ico" rel="shortcut icon">
+    <script src="js/app.js" type="text/javascript"></script>
+    <script src="https://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+    <script src="https://www.gongjuji.net/Content/files/jquery.md5.js"></script>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+</head>
+<body>
+
+<form method="post">
+    <div class="container">
+        <label><b>用户名</b></label>
+        <input id="username" name="uname" readonly required type="text">
+
+        <label><b>昵称</b></label>
+        <input id="nickname" name="nick" placeholder="Enter nickname" required type="text">
+
+        <div id="login_control">
+            <button id="btn_edit" onclick="changeNickName()" type="button">修改昵称</button>
+            <button id="btn_logout" onclick="logout()" type="button">登出</button>
+            <button id="btn_logoff" onclick="logoff()" type="button">注销用户</button>
+            <button id="btn_cert" onclick="redirectToCertPage()" type="button">我的证书</button>
+            <button id="btn_testcontract" onclick="testContract()" type="button">测试合约</button>
+        </div>
+    </div>
+</form>
+
+
+</body>
+</html>
+
+<script>
+
+    var username = document.getElementById('username')
+
+    from_username = getQueryVariable('name')
+    username.value = from_username
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('get', urlPrefix + '/user/get_user_info?username=' + from_username);
+    xhr.send()
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = eval("(" + xhr.responseText + ")")
+
+            if (json.code !== 0) {
+                alert("请先登录!" + json.msg)
+                window.location.href = "login.html"
+            }
+            console.log(json)
+            username.value = json.data.user_name
+            nickname.value = json.data.nick_name
+            previousNickname = json.data.nick_name
+        }
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] === variable) {
+                return pair[1];
+            }
+        }
+        return false;
+    }
+
+    function logout() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/user/logout',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value,
+            }),
+            success: function () {
+                alert("登出成功");
+                window.location.href = urlPrefix + "/static/login.html";
+            },
+            error: function () {
+                alert("登出失败")
+            }
+        });
+    }
+
+    function changeNickName() {
+        var newNickname = nickname.value
+        if (newNickname.length < 1) {
+            alert('昵称长度不能为空')
+            return
+        }
+
+        if (newNickname === previousNickname) {
+            alert('昵称没有改变')
+            return
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/user/update_nick_name',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value,
+                "new_nick_name": newNickname,
+            }),
+            success: function (result) {
+                if (result.code === 0) {
+                    alert("修改成功");
+                } else {
+                    alert("修改失败")
+                }
+            },
+            error: function () {
+                alert("修改失败")
+            }
+        });
+    }
+
+    function logoff() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/user/delete',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value
+            }),
+            success: function (result) {
+                if (result.code === 0) {
+                    alert("注销成功");
+                    redirectToLoginPage();
+                } else {
+                    alert("注销失败");
+                }
+            },
+            error: function () {
+                alert("注销失败");
+            }
+        });
+    }
+
+    function redirectToLoginPage() {
+        window.location.href = "login.html";
+    }
+
+    function redirectToCertPage() {
+        window.location.href = "cert.html";
+    }
+
+    function testContract() {
+        //弹出输入框，输入contract_name、method、with_sync_result
+        var contract_name = prompt("请输入合约名", "rusttest");
+        var method = prompt("请输入方法名", "save");
+        var with_sync_result = prompt("是否同步", "true");
+        //将with_sync_result转换为布尔值
+        with_sync_result = with_sync_result === "true";
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: urlPrefix + '/contract/test',
+            contentType: "application/json",
+            data: JSON.stringify({
+                "user_name": username.value,
+                "contract_name": contract_name,
+                "method": method,
+                "with_sync_result": with_sync_result
+            }),
+            success: function (result) {
+                if (result.code === 0) {
+                    alert("调用成功");
+                } else {
+                    alert("调用失败");
+                }
+            },
+            error: function () {
+                alert("调用失败");
+            }
+        });
+    }
+
+
+</script>

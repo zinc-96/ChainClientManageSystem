@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="images/favicon.ico" rel="shortcut icon">
+    <script src="js/app.js" type="text/javascript"></script>
+    <script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="https://www.gongjuji.net/Content/files/jquery.md5.js"></script>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>查看证书</title>
+</head>
+<body>
+
+<div class="container">
+    <label><b>用户名</b></label>
+    <input id="username" name="uname" readonly required type="text">
+
+    <label><b>昵称</b></label>
+    <input id="nickname" name="nick" placeholder="Enter nickname" required type="text">
+
+    <button id="btn_createcert" onclick="redirectToCreateCertPage()" type="button">创建证书</button>
+    <button id="btn_querycert" onclick="queryCert()" type="button">查询证书</button>
+    <h4>我的证书</h4>
+    <div class="table-container">
+        <table id="certTable">
+            <thead>
+            <tr>
+                <th data-sort="OrgId">OrgId<br>UserId<br>UserType<br>CertUsage</th>
+                <th data-sort="Country">Country<br>Locality<br>Province</th>
+                <th data-sort="Cert">Cert</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    var username = document.getElementById('username')
+
+    from_username = getQueryVariable('name')
+    username.value = from_username
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('get', urlPrefix + '/user/get_user_info?username=' + from_username);
+    xhr.send()
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var json = eval("(" + xhr.responseText + ")")
+
+            if (json.code !== 0) {
+                alert("请先登录!" + json.msg)
+                window.location.href = "login.html"
+            }
+            console.log(json)
+            username.value = json.data.user_name
+            nickname.value = json.data.nick_name
+            previousNickname = json.data.nick_name
+        }
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] === variable) {
+                return pair[1];
+            }
+        }
+        return false;
+    }
+
+
+    function queryCert() {
+        // 请求证书数据
+        $.ajax({
+            url: '/cert/query',
+            dataType: "json",
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                "user_name": username.value,
+            }),
+            success: function (response) {
+                if (response.code === 0) {
+                    let data = JSON.parse(response.data).data;
+                    for (let i = 0; i < data.length; i++) {
+                        let cert = data[i];
+                        // 将所有的\\n替换为<br>，否则在页面中不会换行
+                        cert.Cert = cert.Cert.replace(/\\n/g, '<br>');
+                        cert.Cert = cert.Cert.replace(/-----BEGIN CERTIFICATE-----/g, '-----BEGIN CERTIFICATE-----<br>');
+                        cert.Cert = cert.Cert.replace(/-----END/g, '<br>-----END');
+                        let tr = '<tr>';
+                        tr += '<td>' + cert.OrgId + '<br>' + cert.UserId + '<br>' + cert.UserType + '<br>' + cert.CertUsage + '</td>';
+                        tr += '<td>' + cert.Country + '<br>' + cert.Locality + '<br>' + cert.Province + '</td>';
+                        tr += '<td>' + cert.Cert + '</td>';
+                        tr += '</tr>';
+                        $('#certTable tbody').append(tr);
+                    }
+                } else {
+                    alert('请求失败');
+                }
+            },
+            error: function (response) {
+                alert('请求失败');
+            }
+        });
+
+        // 排序功能
+        $('th').click(function () {
+            let table = $(this).parents('table').eq(0);
+            let rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()));
+            this.asc = !this.asc;
+            if (!this.asc) {
+                rows = rows.reverse();
+            }
+            for (let i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
+            }
+        });
+
+        function comparer(index) {
+            return function (a, b) {
+                var val1 = $(a).children('td').eq(index).text();
+                var val2 = $(b).children('td').eq(index).text();
+                return $.isNumeric(val1) && $.isNumeric(val2) ? val1 - val2 : val1.localeCompare(val2);
+            };
+        }
+
+        // 折叠展开功能
+        $('#certTable').on('click', '.toggle-content', function () {
+            $(this).next('.extended-content').toggle();
+        });
+
+        // 双击复制功能
+        $('#certTable').on('dblclick', 'td', function () {
+            var text = $(this).text();
+            navigator.clipboard.writeText(text).then(function () {
+                alert('内容已复制到剪贴板');
+            }, function () {
+                alert('复制失败');
+            });
+        });
+    }
+
+    function redirectToCreateCertPage() {
+        window.location.href = "createCert.html";
+    }
+</script>
+
+</body>
+</html>
